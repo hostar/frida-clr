@@ -6,7 +6,6 @@
 #include <msclr/gcroot.h>
 
 using namespace System;
-using System::Windows::Threading::Dispatcher;
 
 namespace Frida
 {
@@ -18,7 +17,7 @@ namespace Frida
   public ref class Session
   {
   internal:
-    Session (FridaSession * handle, Dispatcher ^ dispatcher);
+    Session (FridaSession * handle);
   public:
     ~Session ();
   protected:
@@ -40,7 +39,6 @@ namespace Frida
     FridaSession * handle;
     msclr::gcroot<Session ^> * selfHandle;
 
-    Dispatcher ^ dispatcher;
     SessionDetachedHandler ^ onDetachedHandler;
   };
 

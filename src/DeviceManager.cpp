@@ -4,14 +4,11 @@
 #include "Marshal.hpp"
 #include "Runtime.hpp"
 
-using System::Windows::Threading::DispatcherPriority;
-
 namespace Frida
 {
   static void OnDeviceManagerChanged (FridaDeviceManager * manager, gpointer user_data);
 
-  DeviceManager::DeviceManager (Dispatcher ^ dispatcher)
-    : dispatcher (dispatcher)
+  DeviceManager::DeviceManager ()
   {
     Runtime::Ref ();
 
@@ -59,7 +56,7 @@ namespace Frida
     gint result_length = frida_device_list_size (result);
     array<Device ^> ^ devices = gcnew array<Device ^> (result_length);
     for (gint i = 0; i != result_length; i++)
-      devices[i] = gcnew Device (frida_device_list_get (result, i), dispatcher);
+      devices[i] = gcnew Device (frida_device_list_get (result, i));
 
     g_object_unref (result);
 
@@ -69,10 +66,7 @@ namespace Frida
   void
   DeviceManager::OnChanged (Object ^ sender, EventArgs ^ e)
   {
-    if (dispatcher->CheckAccess ())
-      Changed (sender, e);
-    else
-      dispatcher->BeginInvoke (DispatcherPriority::Normal, onChangedHandler, sender, e);
+      Changed(sender, e);
   }
 
   static void

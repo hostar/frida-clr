@@ -4,15 +4,12 @@
 #include "Runtime.hpp"
 #include "Script.hpp"
 
-using System::Windows::Threading::DispatcherPriority;
-
 namespace Frida
 {
   static void OnSessionDetached (FridaSession * session, FridaSessionDetachReason reason, FridaCrash * crash, gpointer user_data);
 
-  Session::Session (FridaSession * handle, Dispatcher ^ dispatcher)
-    : handle (handle),
-      dispatcher (dispatcher)
+  Session::Session (FridaSession * handle)
+    : handle (handle)
   {
     Runtime::Ref ();
 
@@ -92,16 +89,13 @@ namespace Frida
 
     Marshal::ThrowGErrorIfSet (&error);
 
-    return gcnew Script (script, dispatcher);
+    return gcnew Script (script);
   }
 
   void
   Session::OnDetached (Object ^ sender, SessionDetachedEventArgs ^ e)
   {
-    if (dispatcher->CheckAccess ())
-      Detached (sender, e);
-    else
-      dispatcher->BeginInvoke (DispatcherPriority::Normal, onDetachedHandler, sender, e);
+      Detached(sender, e);
   }
 
   static void

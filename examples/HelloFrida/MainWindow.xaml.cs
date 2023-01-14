@@ -39,25 +39,28 @@ namespace HelloFrida
 
         private void RefreshAllowedActions()
         {
-            deviceList.IsEnabled = session == null;
-            refreshButton.IsEnabled = session == null && deviceList.SelectedItem != null;
+            deviceList.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                deviceList.IsEnabled = session == null;
+                refreshButton.IsEnabled = session == null && deviceList.SelectedItem != null;
 
-            processList.IsEnabled = session == null;
-            spawnButton.IsEnabled = processList.SelectedItem != null;
-            resumeButton.IsEnabled = processList.SelectedItem != null;
-            attachButton.IsEnabled = processList.SelectedItem != null && session == null;
-            detachButton.IsEnabled = session != null;
+                processList.IsEnabled = session == null;
+                spawnButton.IsEnabled = processList.SelectedItem != null;
+                resumeButton.IsEnabled = processList.SelectedItem != null;
+                attachButton.IsEnabled = processList.SelectedItem != null && session == null;
+                detachButton.IsEnabled = session != null;
 
-            scriptSource.IsEnabled = session != null && script == null;
-            createScriptButton.IsEnabled = session != null && script == null;
-            loadScriptButton.IsEnabled = script != null && !scriptLoaded;
-            unloadScriptButton.IsEnabled = script != null;
-            postToScriptButton.IsEnabled = script != null && scriptLoaded;
+                scriptSource.IsEnabled = session != null && script == null;
+                createScriptButton.IsEnabled = session != null && script == null;
+                loadScriptButton.IsEnabled = script != null && !scriptLoaded;
+                unloadScriptButton.IsEnabled = script != null;
+                postToScriptButton.IsEnabled = script != null && scriptLoaded;
+            }));
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            deviceManager = new Frida.DeviceManager(Dispatcher);
+            deviceManager = new Frida.DeviceManager();
             deviceManager.Changed += new EventHandler(deviceManager_Changed);
             RefreshDeviceList();
             RefreshAllowedActions();
@@ -66,7 +69,7 @@ namespace HelloFrida
         private void RefreshDeviceList()
         {
             var devices = deviceManager.EnumerateDevices();
-            debugConsole.Items.Add(String.Format("Got {0} devices", devices.Length));
+            consoleAdd($"Got {devices.Length} devices");
             Array.Sort(devices, delegate(Frida.Device a, Frida.Device b)
             {
                 var aHasIcon = a.Icon != null;
@@ -78,7 +81,9 @@ namespace HelloFrida
             });
             Devices.Clear();
             foreach (var device in devices)
+            {
                 Devices.Add(device);
+            }
         }
 
         private void RefreshProcessList()
@@ -103,18 +108,20 @@ namespace HelloFrida
                 });
                 Processes.Clear();
                 foreach (var process in processes)
+                {
                     Processes.Add(process);
+                }
             }
             catch (Exception ex)
             {
-                debugConsole.Items.Add("EnumerateProcesses failed: " + ex.Message);
+                consoleAdd("EnumerateProcesses failed: " + ex.Message);
                 Processes.Clear();
             }
         }
 
         private void deviceManager_Changed(object sender, EventArgs e)
         {
-            debugConsole.Items.Add("DeviceManager Changed");
+            consoleAdd("DeviceManager Changed");
             RefreshDeviceList();
         }
 
@@ -143,7 +150,7 @@ namespace HelloFrida
             }
             catch (Exception ex)
             {
-                debugConsole.Items.Add("Spawn failed: " + ex.Message);
+                consoleAdd("Spawn failed: " + ex.Message);
             }
         }
 
@@ -152,11 +159,11 @@ namespace HelloFrida
             var device = deviceList.SelectedItem as Frida.Device;
             try
             {
-                device.Resume(1337);
+                device.Resume(session.Pid);
             }
             catch (Exception ex)
             {
-                debugConsole.Items.Add("Resume failed: " + ex.Message);
+                consoleAdd("Resume failed: " + ex.Message);
             }
         }
 
@@ -171,11 +178,11 @@ namespace HelloFrida
             }
             catch (Exception ex)
             {
-                debugConsole.Items.Add("Attach failed: " + ex.Message);
+                consoleAdd("Attach failed: " + ex.Message);
                 return;
             }
             session.Detached += new Frida.SessionDetachedHandler(session_Detached);
-            debugConsole.Items.Add("Attached to " + session.Pid);
+            consoleAdd("Attached to " + session.Pid);
             RefreshAllowedActions();
         }
 
@@ -191,7 +198,8 @@ namespace HelloFrida
         {
             if (sender == session)
             {
-                debugConsole.Items.Add($"Detached from Session with PID {session.Pid} ({e.Reason})");
+                consoleAdd($"Detached from Session with PID {session.Pid} ({e.Reason})");
+                
                 session = null;
                 script = null;
                 RefreshAllowedActions();
@@ -208,7 +216,7 @@ namespace HelloFrida
                 }
                 catch (Exception ex)
                 {
-                    debugConsole.Items.Add("Failed to unload previous script: " + ex.Message);
+                    consoleAdd("Failed to unload previous script: " + ex.Message);
                 }
                 script = null;
                 scriptLoaded = false;
@@ -223,7 +231,8 @@ namespace HelloFrida
             }
             catch (Exception ex)
             {
-                debugConsole.Items.Add("CreateScript failed: " + ex.Message);
+                consoleAdd("CreateScript failed: " + ex.Message);
+
                 return;
             }
             script.Message += new Frida.ScriptMessageHandler(script_Message);
@@ -239,7 +248,7 @@ namespace HelloFrida
             }
             catch (Exception ex)
             {
-                debugConsole.Items.Add("Load failed: " + ex.Message);
+                consoleAdd("Load failed: " + ex.Message);
             }
         }
 
@@ -251,7 +260,7 @@ namespace HelloFrida
             }
             catch (Exception ex)
             {
-                debugConsole.Items.Add("Failed to unload script: " + ex.Message);
+                consoleAdd("Failed to unload script: " + ex.Message);
             }
             script = null;
             scriptLoaded = false;
@@ -262,11 +271,11 @@ namespace HelloFrida
         {
             try
             {
-                script.Post("{\"type\":\"banana\"}");
+                script.Post("{\"type\":\"" + messageSource.Text + "\"}");
             }
             catch (Exception ex)
             {
-                debugConsole.Items.Add("PostMessage failed: " + ex.Message);
+                consoleAdd("PostMessage failed: " + ex.Message);
             }
         }
 
@@ -274,9 +283,17 @@ namespace HelloFrida
         {
             if (sender == script)
             {
-                debugConsole.Items.Add(String.Format("Message from Script: {0}", e.Message));
-                debugConsole.Items.Add(String.Format("  Data: {0}", e.Data == null ? "null" : String.Join(", ", e.Data)));
+                consoleAdd(string.Format("Message from Script: {0}", e.Message));
+                consoleAdd(string.Format("  Data: {0}", e.Data == null ? "null" : string.Join(", ", e.Data)));
             }
+        }
+
+        private void consoleAdd(string str)
+        {
+            debugConsole.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                debugConsole.Items.Add(str);
+            }));
         }
     }
 }

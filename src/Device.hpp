@@ -8,7 +8,6 @@
 
 using namespace System;
 using namespace System::Windows::Media;
-using System::Windows::Threading::Dispatcher;
 
 namespace Frida
 {
@@ -32,7 +31,7 @@ namespace Frida
   public ref class Device
   {
   internal:
-    Device (FridaDevice * handle, Dispatcher ^ dispatcher);
+    Device (FridaDevice * handle);
   public:
     ~Device ();
   protected:
@@ -62,7 +61,6 @@ namespace Frida
     FridaDevice * handle;
     msclr::gcroot<Device ^> * selfHandle;
 
-    Dispatcher ^ dispatcher;
     ImageSource ^ icon;
     EventHandler ^ onLostHandler;
   };

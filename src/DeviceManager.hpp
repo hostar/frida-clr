@@ -6,7 +6,6 @@
 #include <msclr/gcroot.h>
 
 using namespace System;
-using System::Windows::Threading::Dispatcher;
 
 namespace Frida
 {
@@ -15,7 +14,7 @@ namespace Frida
   public ref class DeviceManager
   {
   public:
-    DeviceManager (Dispatcher ^ dispatcher);
+    DeviceManager ();
     ~DeviceManager ();
   protected:
     !DeviceManager ();
@@ -32,7 +31,6 @@ namespace Frida
     FridaDeviceManager * handle;
     msclr::gcroot<DeviceManager ^> * selfHandle;
 
-    Dispatcher ^ dispatcher;
     EventHandler ^ onChangedHandler;
   };
 }

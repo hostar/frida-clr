@@ -5,15 +5,12 @@
 #include "Runtime.hpp"
 #include "Session.hpp"
 
-using System::Windows::Threading::DispatcherPriority;
-
 namespace Frida
 {
   static void OnDeviceLost (FridaDevice * device, gpointer user_data);
 
-  Device::Device (FridaDevice * handle, Dispatcher ^ dispatcher)
+  Device::Device (FridaDevice * handle)
     : handle (handle),
-      dispatcher (dispatcher),
       icon (nullptr)
   {
     Runtime::Ref ();
@@ -208,7 +205,7 @@ namespace Frida
     FridaSession * session = frida_device_attach_sync (handle, pid, nullptr, nullptr, &error);
     Marshal::ThrowGErrorIfSet (&error);
 
-    return gcnew Session (session, dispatcher);
+    return gcnew Session (session);
   }
 
   String ^
@@ -222,10 +219,7 @@ namespace Frida
   void
   Device::OnLost (Object ^ sender, EventArgs ^ e)
   {
-    if (dispatcher->CheckAccess ())
-      Lost (sender, e);
-    else
-      dispatcher->BeginInvoke (DispatcherPriority::Normal, onLostHandler, sender, e);
+      Lost(sender, e);
   }
 
   static void

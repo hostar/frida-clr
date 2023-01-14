@@ -34,7 +34,8 @@
         <TextBox Margin="12,229,0,128" Name="scriptSource" AcceptsReturn="True" AcceptsTab="True" Text="var a = Memory.allocUtf8String(&quot;Hei&quot;);&#x0a;send({woot: 1227});&#x0a;send({hello: 1337}, Memory.readByteArray(a, 4));&#x0a;var onMessage = function onMessage(m) {&#x0a;  send({reply: m});&#x0a;  recv(onMessage);&#x0a;};&#x0a;recv(onMessage);&#x0a;" HorizontalAlignment="Left" Width="269" />
         <Button Content="Unload Script" Height="23" HorizontalAlignment="Left" Margin="287,285,0,0" Name="unloadScriptButton" VerticalAlignment="Top" Width="93" Click="unloadScriptButton_Click" />
         <Button Content="Create Script" Height="23" HorizontalAlignment="Left" Margin="287,228,0,0" Name="createScriptButton" VerticalAlignment="Top" Width="93" Click="createScriptButton_Click" />
-        <Button Content="Post to Script" Height="23" HorizontalAlignment="Left" Margin="287,314,0,0" Name="postToScriptButton" VerticalAlignment="Top" Width="93" Click="postToScriptButton_Click" />
+        <Button Content="Post to Script" Height="23" HorizontalAlignment="Left" Margin="411,0,0,0" Name="postToScriptButton" VerticalAlignment="Center" Width="155" Click="postToScriptButton_Click" />
         <Button Content="Detach" Height="23" HorizontalAlignment="Left" Margin="287,174,0,0" Name="detachButton" VerticalAlignment="Top" Width="93" Click="detachButton_Click" />
+        <TextBox Margin="411,117,0,296" x:Name="messageSource" AcceptsReturn="True" AcceptsTab="True" Text="message" HorizontalAlignment="Left" Width="155" />
     </Grid>
 </Window>

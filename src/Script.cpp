@@ -3,15 +3,12 @@
 #include "Marshal.hpp"
 #include "Runtime.hpp"
 
-using System::Windows::Threading::DispatcherPriority;
-
 namespace Frida
 {
   static void OnScriptMessage (FridaScript * script, const gchar * message, GBytes * data, gpointer user_data);
 
-  Script::Script (FridaScript * handle, Dispatcher ^ dispatcher)
-    : handle (handle),
-      dispatcher (dispatcher)
+  Script::Script (FridaScript * handle)
+    : handle (handle)
   {
     Runtime::Ref ();
 
@@ -126,10 +123,7 @@ namespace Frida
   void
   Script::OnMessage (Object ^ sender, ScriptMessageEventArgs ^ e)
   {
-    if (dispatcher->CheckAccess ())
-      Message (sender, e);
-    else
-      dispatcher->BeginInvoke (DispatcherPriority::Normal, onMessageHandler, sender, e);
+      Message(sender, e);
   }
 
   static void

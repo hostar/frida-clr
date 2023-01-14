@@ -6,7 +6,6 @@
 #include <msclr/gcroot.h>
 
 using namespace System;
-using System::Windows::Threading::Dispatcher;
 
 namespace Frida
 {
@@ -16,7 +15,7 @@ namespace Frida
   public ref class Script
   {
   internal:
-    Script (FridaScript * handle, Dispatcher ^ dispatcher);
+    Script (FridaScript * handle);
   public:
     ~Script ();
   protected:
@@ -41,7 +40,6 @@ namespace Frida
     FridaScript * handle;
     msclr::gcroot<Script ^> * selfHandle;
 
-    Dispatcher ^ dispatcher;
     ScriptMessageHandler ^ onMessageHandler;
   };
 
